@@ -10,7 +10,7 @@ output: pdf_document
 
 ${df_head}
 
-![A beautiful image](images/${image_id}.png)
+![A beautiful image](images/${image_file_name})
 
 Equations:
 

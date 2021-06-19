@@ -4,6 +4,8 @@ from string import Template
 from uuid import uuid4
 import seaborn as sns
 
+image_file_type = "eps"
+
 # Apply the default theme
 sns.set_theme()
 
@@ -22,7 +24,7 @@ sns_plot = sns.relplot(
 )
 
 image_id = uuid4()
-sns_plot.savefig(f"images/{image_id}.png")
+sns_plot.savefig(f"images/{image_id}.{image_file_type}")
 
 ###########################################################
 # Generate markdown file
@@ -37,7 +39,7 @@ rendered = t.safe_substitute(  # safe_substitute allows you to include dollar si
         "df_head": df.head().to_markdown(
             index=False, numalign="center", stralign="center"
         ),  # note: numalign & stralign are parameters that are passed to the tabulate package
-        "image_id": image_id,
+        "image_file_name": f"{image_id}.{image_file_type}",
     }
 )
 
