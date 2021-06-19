@@ -22,3 +22,12 @@ Generating pretty reports using pandas and pandoc
 * `svgz`: got an exception `could not convert image`❌  
 * `tif`: just an image; text is blurry & cannot be highlighted❌  
 * `tiff`: just an image; text is blurry & cannot be highlighted❌  
+
+# Process Flow
+* string.Template is used to render a markdown template  
+* `pandas.DataFrame.to_markdown` is used to create markdown tables  
+* `pandoc` is used to the convert markdown file output into a pdf file (markdown 🡲 LaTeX 🡲 pdf)  
+
+# Requirements  
+* See `requirements.txt` for the Python package requirements  
+* Also requires `pandoc` and `MiKTeX` to be installed (on Windows)  
