@@ -12,9 +12,12 @@ ${df_head}
 
 ![A beautiful image](images/${image_id}.png)
 
-Some equation:
+Equations:
 
 \begin{equation}
-x+1 = 2 \\
-y+2 = 3
+B_{i+1} = B_{i} - SchedPrinc_{i} - UnschedPrinc_{i}
+\end{equation}
+
+\begin{equation}
+SMM = 1-(1-CPR)^\frac{1}{12}
 \end{equation}

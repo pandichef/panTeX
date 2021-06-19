@@ -34,7 +34,9 @@ rendered = t.safe_substitute(  # safe_substitute allows you to include dollar si
     {
         "customer_name": "J.P. Morgan Chase",
         "date_string": "March 2021",
-        "df_head": df.head().to_markdown(),
+        "df_head": df.head().to_markdown(
+            index=False, numalign="center", stralign="center"
+        ),  # note: numalign & stralign are parameters that are passed to the tabulate package
         "image_id": image_id,
     }
 )
