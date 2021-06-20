@@ -7,7 +7,7 @@ output: pdf_document
 ---
 # Hello, this is a markdown file
 
-${df_head}
+${the_raw_data}
 
 <!-- ![A beautiful image](images/${image_file_name}) -->
 ${image_file_name}

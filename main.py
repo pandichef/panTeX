@@ -1,38 +1,12 @@
 # https://seaborn.pydata.org/introduction.html
 from datetime import time
-from re import sub, template
 import subprocess
 from string import Template
-
-# import tempfile
-import time
-
 from uuid import uuid4
 import seaborn as sns
 import pandas as pd
 
-# sns.axisgrid.FacetGrid
 
-
-# Apply the default theme
-sns.set_theme()
-
-# Load an example dataset
-df = sns.load_dataset("tips")
-
-# Create a visualization
-sns_plot = sns.relplot(
-    data=df,
-    x="total_bill",
-    y="tip",
-    col="time",
-    hue="smoker",
-    style="smoker",
-    size="size",
-)
-
-# image_id = uuid4()
-# sns_plot.savefig(f"images/{image_id}.{image_file_type}")
 def render_markdown(template_name, context=None):
     image_file_type = "eps"
 
@@ -57,6 +31,8 @@ def render_markdown(template_name, context=None):
             md_string = value.to_markdown(
                 index=False, numalign="center", stralign="center"
             )
+            # https://tex.stackexchange.com/questions/139106/referencing-tables-in-pandoc
+            md_string += "\n\nTable: " + key.replace("_", " ").title() + "\n\n"
             context.update({key: md_string})
         # print(context[key])
 
@@ -81,17 +57,34 @@ def render_markdown(template_name, context=None):
     )
 
     # Cleanup temporary files
-    subprocess.run("rm -rf ./temporary_files", shell=True, check=True)
+    # subprocess.run("rm -rf ./temporary_files", shell=True, check=True)
 
     return True
 
+
+# Apply the default theme
+sns.set_theme()
+
+# Load an example dataset
+df = sns.load_dataset("tips")
+
+# Create a visualization
+sns_plot = sns.relplot(
+    data=df,
+    x="total_bill",
+    y="tip",
+    col="time",
+    hue="smoker",
+    style="smoker",
+    size="size",
+)
 
 render_markdown(
     "markdown_template.md",
     {
         "customer_name": "J.P. Morgan Chase",
         "date_string": "March 2021",
-        "df_head": df.head(3),
+        "the_raw_data": df.head(3),
         "image_file_name": sns_plot,
     },
 )
