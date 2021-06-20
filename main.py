@@ -7,7 +7,7 @@ import seaborn as sns
 import pandas as pd
 
 
-def render_markdown(template_name, context=None):
+def render_markdown(template_name, report_name, context=None):
     image_file_type = "eps"
 
     try:
@@ -51,7 +51,7 @@ def render_markdown(template_name, context=None):
     # https://docs.python.org/3/library/subprocess.html
     # https://pandoc.org/demos.html
     subprocess.run(
-        "pandoc temporary_files/output.md --pdf-engine xelatex -o output.pdf",
+        f"pandoc temporary_files/output.md --pdf-engine xelatex -o {report_name}",
         shell=True,
         check=True,
     )
@@ -81,6 +81,7 @@ sns_plot = sns.relplot(
 
 render_markdown(
     "markdown_template.md",
+    "output.pdf",
     {
         "customer_name": "J.P. Morgan Chase",
         "date_string": "March 2021",
