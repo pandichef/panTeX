@@ -12,6 +12,8 @@ ${the_raw_data}
 <!-- ![A beautiful image](images/${image_file_name}) -->
 ${image_file_name}
 
+${matplotlib1}
+
 Equations:
 
 \begin{equation}

@@ -132,5 +132,6 @@ dmypy.json
 images/
 output/
 .vscode/
-output.pdf
+output.*
 temporary_files/
+assets/
