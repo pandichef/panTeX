@@ -57,7 +57,7 @@ def render_markdown(template_name, report_name, context=None):
     )
 
     # Cleanup temporary files
-    # subprocess.run("rm -rf ./temporary_files", shell=True, check=True)
+    subprocess.run("rm -rf ./temporary_files", shell=True, check=True)
 
     return True
 
