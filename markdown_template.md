@@ -9,7 +9,8 @@ output: pdf_document
 
 ${df_head}
 
-![A beautiful image](images/${image_file_name})
+<!-- ![A beautiful image](images/${image_file_name}) -->
+${image_file_name}
 
 Equations:
 
