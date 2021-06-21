@@ -8,11 +8,30 @@ Generating pretty reports using pandas and matplotlib.
 * Install [Browsersync](https://browsersync.io/) (for browser mode): `npm install -g browser-sync`  
 
 # Quickstart
-To create a `pantex.Manager` object: `m = pantex.Manager('mytemplate.md')`  
-To save context to `mytemplate.pkl`: `m.save_context({'my_header': 'Hello World!', 'my_table': df.head()})`  
-To append to context in a Python script: `m.save_context({'my_footer': 'Goodbye!', 'an_image': mplFigure}, append=True)`  
-To generate a pretty pdf report: `m.save_to_pdf()`  
+To create a `pantex.Manager` object:  
+```python
+m = pantex.Manager('mytemplate.md')
+```  
+
+To save context to `mytemplate.pkl`: 
+```python
+m.save_context({'my_header': 'Hello World!', 'my_table': df.head()})
+```
+
+To append to context in a Python script:  
+```python
+m.save_context({'my_footer': 'Goodbye!', 'an_image': mplFigure}, append=True)
+```
+
+To generate a pretty pdf report:  
+```python
+m.save_to_pdf()
+```
+
 To read the current context in a Python script: `m.get_context()`  
+```python
+m.get_context()
+```
 
 # Quickstart via Command Line
 To run in browser mode: `python -m pantex.edit mytemplate.md`  
