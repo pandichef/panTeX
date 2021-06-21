@@ -1,18 +1,18 @@
-# pretty-reports
+# panTeX
 Generating pretty reports using pandas and matplotlib.  
 
 # Installation
-* `pip install pretty-reports` to install the main application  
+* `pip install pantex` to install the main application  
 * Install [MiKTeX](https://miktex.org/howto/install-miktex) (on Windows) or TBD on Linux  
 * Install [pandoc](https://pandoc.org/installing.html)  
 * Install `browser-sync` (for browser mode): `npm install -g browser-sync`  
 
 # Quickstart via Command Line
-To run in browser mode: `pretty-reports --browser ./my_template_file.md`  
-To prduce a pretty LaTeX pdf report: `pretty-reports ./my_template_file.md`  
-To export context variables in a Python script: `save_context({'title': 'Hello World', 'table': df.head()})`  
-To add to context in a Python script: `save_context({'title': 'Hello World', 'table': df.head()}, append=True)`  
-To read the current context in a Python script: `read_context()`  
+To run in browser mode: `python -m pantex.browser -s ./my_template_file.md`  
+To prduce a pretty LaTeX pdf report: `python -m pantex.publish -s ./my_template_file.md -o -s ./pretty_report.pdf`  
+To export context variables in a Python script: `m.save_context({'title': 'Hello World', 'table': df.head()})`  
+To add to context in a Python script: `m.save_context({'title': 'Hello World', 'table': df.head()}, append=True)`  
+To read the current context in a Python script: `m.get_context()`  
 
 # Quickstart via Python
 You can also use pantex directly from Python e.g., if you have a business process that pulls data from 

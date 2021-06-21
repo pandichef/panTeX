@@ -26,23 +26,21 @@ def sha1(filename):
 
 
 def check_for_updates(filename, previous_hash):
-    current_hash = sha1(filename)
+    current_hash = sha1(filename[0]) + sha1(filename[1])
     if previous_hash is None:
-        previous_hash = sha1(filename)
+        previous_hash = sha1(filename[0]) + sha1(filename[1])
     while True:
         # sleep(0.01)  # to slow it down
         if current_hash != previous_hash:
             return current_hash
-        current_hash = sha1(filename)
+        current_hash = sha1(filename[0]) + sha1(filename[1])
 
 
 class Server(Manager):
-    def __init__(self, working_on=None, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        if working_on == None:
-            self._working_on = self._template
-        else:
-            self._working_on = working_on
+        self._file_being_watched_1 = self._template
+        self._file_being_watched_2 = self._context
 
     def run_dev_server(self):
         self.save_to_html("output.html")
@@ -55,10 +53,17 @@ class Server(Manager):
         while True:
             # subprocess.Popen
             new_hash = check_for_updates(
-                filename=self._working_on, previous_hash=previous_hash
+                filename=[self._file_being_watched_1, self._file_being_watched_2],
+                previous_hash=previous_hash,
             )
-
-            self.save_to_html("output.html")
+            passed = False
+            while not passed:
+                # This is a hack; reading context file to quickly is a problem
+                try:
+                    self.save_to_html("output.html")
+                    passed = True
+                except EOFError as e:
+                    pass
             previous_hash = new_hash
 
 
@@ -66,13 +71,23 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
+    # parser.add_argument(
+    #     "--template",
+    #     "-s",
+    #     required=True,
+    #     # default=os.getcwd(),
+    #     # help="Specify alternative directory " "[default:current directory]",
+    # )
     parser.add_argument(
-        "--template",
-        "-s",
-        required=True,
-        # default=os.getcwd(),
-        # help="Specify alternative directory " "[default:current directory]",
+        "template", type=str, help="The template file path (md)",
     )
+    parser.add_argument(
+        "context", type=str, help="The context file path (pkl)",
+    )
+    # parser.add_argument(
+    #     "output", type=str, help="The pretty LaTeX report (pdf)",
+    # )
     args = parser.parse_args()
-    s = Server(template=args.template)
+    args = parser.parse_args()
+    s = Server(template=args.template, context=args.context)
     s.run_dev_server()

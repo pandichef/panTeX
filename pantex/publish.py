@@ -16,8 +16,8 @@ image_types = {"html": "png", "htm": "png", "pdf": "eps"}
 class Manager:
     def __init__(
         self,
-        template: Union[str, None] = None,
-        context: Union[dict, str, None] = "context.pkl",
+        template: Union[str],
+        context: Union[dict, str],
         assets_directory: str = "assets",
     ) -> None:
         self._template = template
@@ -165,20 +165,33 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
+    # parser.add_argument(
+    #     "--template",
+    #     "-s",
+    #     required=True,
+    #     # default=os.getcwd(),
+    #     # help="Specify alternative directory " "[default:current directory]",
+    # )
+    # parser.add_argument(
+    #     "--output",
+    #     "-o",
+    #     required=True,
+    #     # default=os.getcwd(),
+    #     # help="Specify alternative directory " "[default:current directory]",
+    # )
+    # parser.add_argument("template")
+    # parser.add_argument("context")
+    # parser.add_argument("output")
     parser.add_argument(
-        "--template",
-        "-s",
-        required=True,
-        # default=os.getcwd(),
-        # help="Specify alternative directory " "[default:current directory]",
+        "template", type=str, help="The template file path (md)",
     )
     parser.add_argument(
-        "--output",
-        "-o",
-        required=True,
-        # default=os.getcwd(),
-        # help="Specify alternative directory " "[default:current directory]",
+        "context", type=str, help="The context file path (pkl)",
+    )
+    parser.add_argument(
+        "output", type=str, help="The pretty LaTeX report (pdf)",
     )
     args = parser.parse_args()
-    s = Manager(args.template)
+    # print(args)
+    s = Manager(args.template, args.context)
     s.save_to_pdf(args.output)
