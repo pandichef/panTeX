@@ -7,7 +7,6 @@ output: pdf_document
 ---
 # Hello, this is a file10
 
-
 ${the_raw_data}
 
 <!-- ![A beautiful image](images/${image_file_name}) -->
@@ -24,3 +23,5 @@ B_{i+1} = B_{i} - SchedPrinc_{i} - UnschedPrinc_{i}
 \begin{equation}
 SMM = 1-(1-CPR)^\frac{1}{12}
 \end{equation}
+
+# Hello, this is another file

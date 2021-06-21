@@ -135,3 +135,6 @@ output/
 output.*
 temporary_files/
 assets/
+archive/
+context.pkl
+json_fixture.json
