@@ -78,7 +78,6 @@ class Manager:
         # stringified_context = self.get_context()
         # assert False, stringified_context is self.get_context()
         stringified_context = {}
-        print(self.get_context())
         for label, value in self.get_context().items():
             if type(value) in [sns.axisgrid.FacetGrid, matplotlib.figure.Figure]:
                 md_string = self._render_matplotlib_figure(value, label, image_type)
@@ -88,14 +87,8 @@ class Manager:
                 stringified_context.update({label: md_string})
             else:
                 stringified_context.update({label: value})
-        print(self._template)
-        print(self._template)
-        print(self._template)
-        print(self._template)
-        print(self._template)
         with open(self._template, "r") as fn:
             template_string = fn.read()
-        print(stringified_context)
         template_object = Template(template_string)
         # safe_substitute allows you to include dollar signs
         rendered = template_object.safe_substitute(stringified_context)
@@ -163,7 +156,6 @@ ${html_body}
 """
         )
         body_text = self._render_to_html_body(report_filename)
-        # print(body_text)
         rendered = html_template.substitute({"html_body": body_text})
         with open(f"{report_filename}", "w") as fn:
             fn.write(rendered)
