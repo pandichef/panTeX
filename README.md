@@ -1,5 +1,6 @@
 # panTeX
-Generating pretty reports using pandas and matplotlib.  
+Generating pretty reports using [pandas](https://pandas.pydata.org/) and [matplotlib](https://matplotlib.org/) 
+or [Seaborn](https://seaborn.pydata.org/).  
 
 # Installation
 * `pip install pantex` to install the main application  
@@ -32,6 +33,12 @@ To read the current context in a Python script: `m.get_context()`
 ```python
 m.get_context()
 ```
+To generate a pdf report using a *in-memory* context dictionary:
+```python
+m = pantex.Manager('mytemplate.md', {'my_header': 'Hello World!', 'my_table': df.head()})
+m.save_to_pdf()
+```
+
 
 # Quickstart via Command Line
 To run in browser mode: `python -m pantex.edit mytemplate.md`  
@@ -59,6 +66,27 @@ m.save_to_pdf()
 panTeX will combine the markdown template and the Python context and produce a pretty pdf LaTeX report. 
 Note that pandas DataFrame objects will be automatically rendered as a table.  Matplotlib/Seaborn 
 charts and LaTeX style equations are also supported.  (The LaTeX equations must be contained in `\begin{equation}`/`\end{equation}` tags.)
+
+[matplotlib](https://matplotlib.org/) and [Seaborn](https://seaborn.pydata.org/) plot can also be added to the context.  For example, 
+```python
+import seaborn as sns
+sns.set_theme()
+df = sns.load_dataset("tips")
+sns_plot = sns.relplot(
+    data=df,
+    x="total_bill",
+    y="tip",
+    col="time",
+    hue="smoker",
+    style="smoker",
+    size="size",
+)
+m = pantex.Manager('mytemplate.md')
+m.save_context({'pretty_figure': sns_plot}, append=True)  # "Pretty Figure" will be the image caption
+```
+
+Behind the scenes, panTeX saves the image at `assets/pretty_figure.eps` and adds `![Pretty Figure](assets/pretty_figure.eps)` 
+to the *rendered* version of markdown file.
 
 # The Development Server (Edit Mode)
 `python -m pantex.edit mytemplate.md` enables an in-browser version of the LaTeX report.  It's not quite as pretty as the pdf version, but it offers a near real time rendering experience.  (Rendering of pdf reports is typically too slow for editing.) If you need 
