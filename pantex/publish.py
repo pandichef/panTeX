@@ -6,6 +6,7 @@ import pickle
 import subprocess
 from matplotlib.colors import BoundaryNorm
 import pandas as pd
+from pandas.core import base
 import seaborn as sns
 import matplotlib
 
@@ -17,14 +18,28 @@ class Manager:
     def __init__(
         self,
         template: Union[str],
-        context: Union[dict, str],
+        context: Union[dict, str, None] = None,  # in memory context dict also supported
         assets_directory: str = "assets",
     ) -> None:
         self._template = template
-        self._context = context
+        _template_splitname = self._template.split(".")
+        _template_basename = ".".join(_template_splitname[:-1])
+        _template_extension = _template_splitname[-1]
+        if context is None:
+            self._context = _template_basename + ".pkl"
+        else:
+            self._context = context
+        if _template_extension != "md":
+            raise Exception("Only markdown (.md) template types are supported.")
+        self._rendered_markdown_file_name = "_" + self._template
+        self._pdf_ouput_file_name = _template_basename + ".pdf"
+        self._html_ouput_file_name = _template_basename + ".html"
         self._assets_directory = assets_directory
         if isinstance(self._context, str):
             self._context_file_type = self._context.split(".")[-1]
+            assert (
+                self._context_file_type == "pkl"
+            ), "Only pkl context file types are currently supported"
         if not os.path.isdir(self._assets_directory):
             os.mkdir(self._assets_directory)
 
@@ -75,8 +90,6 @@ class Manager:
         return md_string
 
     def _render_all_to_markdown(self, image_type: Literal["eps", "png"]):
-        # stringified_context = self.get_context()
-        # assert False, stringified_context is self.get_context()
         stringified_context = {}
         for label, value in self.get_context().items():
             if type(value) in [sns.axisgrid.FacetGrid, matplotlib.figure.Figure]:
@@ -94,104 +107,82 @@ class Manager:
         rendered = template_object.safe_substitute(stringified_context)
         return rendered
 
-    def _save_rendered_markdown_file(self, report_filename):
-        split_filename = report_filename.split(".")
-        report_file_extension = split_filename[-1]
-        basename = ".".join(split_filename[:-1])
-        markdown_filename = basename + ".md"
-        with open(markdown_filename, "w") as fn:
-            fn.write(self._render_all_to_markdown(image_types[report_file_extension]))
-        return markdown_filename
+    def _save_rendered_markdown_file(self, report_type: Literal["pdf", "html"]):
+        with open(self._rendered_markdown_file_name, "w") as fn:
+            fn.write(self._render_all_to_markdown(image_types[report_type]))
+        return self._rendered_markdown_file_name
 
-    def save_to_pdf(self, report_filename) -> None:
+    def save_to_pdf(self) -> None:
         # converts markdown file to pdf file
-        report_file_extension = report_filename.split(".")[-1]
-        assert (
-            report_file_extension == "pdf"
-        ), "The report file name must have a pdf extension"
-        markdown_filename = self._save_rendered_markdown_file(report_filename)
+        markdown_filename = self._save_rendered_markdown_file("pdf")
         subprocess.run(
-            f"pandoc {markdown_filename} --pdf-engine xelatex -o {report_filename}",
+            f"pandoc {markdown_filename} --pdf-engine xelatex -o {self._pdf_ouput_file_name}",
             shell=True,
             check=True,
         )
 
-    def _render_to_html_body(self, report_filename) -> str:
+    def _render_to_html_body(self) -> str:
         # converts markdown file to html-body and then returns the body
-        report_file_extension = report_filename.split(".")[-1]
-        assert report_file_extension in [
-            "html",
-            "htm",
-        ], "The report file name must have an html or htm extension"
-        markdown_filename = self._save_rendered_markdown_file(report_filename)
+        _markdown_filename = self._save_rendered_markdown_file("html")
         subprocess.run(  # markdown to html
-            f"pandoc --toc --standalone --mathjax {markdown_filename} -o {report_filename}",
+            # f"pandoc --toc --standalone --css {latex_css} --css {syntaxhighlighting_css} {_markdown_filename} -o {self._html_ouput_file_name}",
+            f"pandoc --toc --standalone --mathjax {_markdown_filename} -o {self._html_ouput_file_name}",
             shell=True,
             check=True,
         )
-        with open(f"{report_filename}", "r") as fn:
-            body_text = fn.read()
-        return body_text
+        with open(self._html_ouput_file_name, "r") as fn:
+            pandoc_html = fn.read()
+        return pandoc_html
 
-    def save_to_html(self, report_filename) -> None:
-        html_template = Template(
-            """
-<!DOCTYPE html>
-<html>
-    <head>
-        <link rel="stylesheet" href="https://latex.now.sh/style.css">
-        <link rel="stylesheet" href="https://latex.now.sh/prism/prism.css">
-    </head>
-<body>
-${html_body}
-<script type="text/javascript" id="MathJax-script" async
-    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-</script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
-<script id="__bs_script__">//<![CDATA[
-    document.write("<script async src='http://HOST:3000/browser-sync/browser-sync-client.js?v=2.26.14'><\/script>".replace("HOST", location.hostname));
-//]]></script>
-</body>
-</html>
-"""
+    def save_to_html(self) -> str:
+        mathjax_script = '<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>'
+        # https://latex.vercel.app/
+        latex_css = '<link rel="stylesheet" href="https://latex.now.sh/style.css">'
+        # mathjax_script = '<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>'
+        syntaxhighlighting_css = (
+            '<link rel="stylesheet" href="https://latex.now.sh/prism/prism.css">'
         )
-        body_text = self._render_to_html_body(report_filename)
-        rendered = html_template.substitute({"html_body": body_text})
-        with open(f"{report_filename}", "w") as fn:
+        syntaxhighlighting_script = (
+            '<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>'
+        )
+        browsersync_script = """<script id="__bs_script__">//<![CDATA[
+            document.write("<script async src='http://HOST:3000/browser-sync/browser-sync-client.js?v=2.26.14'><\/script>".replace("HOST", location.hostname));
+        //]]></script>
+        """
+        css = [latex_css, syntaxhighlighting_css]
+        # pandoc --css seems to place the css at the bottom of <head>
+        scripts = [syntaxhighlighting_script, browsersync_script]  # pandoc does mathjax
+        rendered = self._render_to_html_body()
+        rendered = rendered.replace("<head>", "<head>\n" + "\n".join(css))
+        # rendered = rendered.replace("</head>", "\n".join(css) + "\n</head>") # option 2
+        rendered = rendered.replace("</body>", "\n".join(scripts) + "\n</body>")
+        with open(f"{self._html_ouput_file_name}", "w") as fn:
             fn.write(rendered)
+        return self._html_ouput_file_name
 
 
 if __name__ == "__main__":
+    import os
     import argparse
 
     parser = argparse.ArgumentParser()
-    # parser.add_argument(
-    #     "--template",
-    #     "-s",
-    #     required=True,
-    #     # default=os.getcwd(),
-    #     # help="Specify alternative directory " "[default:current directory]",
-    # )
-    # parser.add_argument(
-    #     "--output",
-    #     "-o",
-    #     required=True,
-    #     # default=os.getcwd(),
-    #     # help="Specify alternative directory " "[default:current directory]",
-    # )
-    # parser.add_argument("template")
-    # parser.add_argument("context")
-    # parser.add_argument("output")
     parser.add_argument(
         "template", type=str, help="The template file path (md)",
     )
-    parser.add_argument(
-        "context", type=str, help="The context file path (pkl)",
-    )
-    parser.add_argument(
-        "output", type=str, help="The pretty LaTeX report (pdf)",
-    )
     args = parser.parse_args()
-    # print(args)
-    s = Manager(args.template, args.context)
-    s.save_to_pdf(args.output)
+    splitname = args.template.split(".")
+    basename = ".".join(splitname[:-1])
+    extension = splitname[-1]
+    if not os.path.isfile(basename + ".pkl"):
+        print(f"{basename}.pkl not found.  Creating an empty context file...")
+        with open(f"{basename}.pkl", "wb") as fn:
+            fn.write(pickle.dumps({}))
+    else:
+        with open(f"{basename}.pkl", "rb") as fn:
+            pickle_data = pickle.loads(fn.read())
+        if len(pickle_data) == 0:
+            print(
+                f"[WARNING] {basename}.pkl contains no data.  Use pantex.Manager.save_context to create context."
+            )
+    m = Manager(args.template)
+    m.save_to_pdf()

@@ -1,6 +1,8 @@
 import os
 import hashlib
 from re import template
+
+from pandas.core import base
 from pantex.publish import Manager
 from time import sleep
 from typing import Union
@@ -42,25 +44,24 @@ class Server(Manager):
         self._file_being_watched_1 = self._template
         self._file_being_watched_2 = self._context
 
-    def run_dev_server(self):
-        self.save_to_html("output.html")
+    def run_server(self):
+        self.save_to_html()
         previous_hash = None
         browser_sync_process = subprocess.Popen(
-            'browser-sync start --server --files "*.html" --index "output.html',
+            f'browser-sync start --server --files "*.html" --index {self._html_ouput_file_name}',
             shell=True,
         )
         print("BrowserSync PID: ", browser_sync_process.pid)
         while True:
-            # subprocess.Popen
             new_hash = check_for_updates(
                 filename=[self._file_being_watched_1, self._file_being_watched_2],
                 previous_hash=previous_hash,
             )
             passed = False
             while not passed:
-                # This is a hack; reading context file to quickly is a problem
+                # This is a hack; reading context file too quickly is a problem
                 try:
-                    self.save_to_html("output.html")
+                    self.save_to_html()
                     passed = True
                 except EOFError as e:
                     pass
@@ -68,26 +69,28 @@ class Server(Manager):
 
 
 if __name__ == "__main__":
+    import os
     import argparse
 
+    # see http.server in standard library
     parser = argparse.ArgumentParser()
-    # parser.add_argument(
-    #     "--template",
-    #     "-s",
-    #     required=True,
-    #     # default=os.getcwd(),
-    #     # help="Specify alternative directory " "[default:current directory]",
-    # )
     parser.add_argument(
         "template", type=str, help="The template file path (md)",
     )
-    parser.add_argument(
-        "context", type=str, help="The context file path (pkl)",
-    )
-    # parser.add_argument(
-    #     "output", type=str, help="The pretty LaTeX report (pdf)",
-    # )
     args = parser.parse_args()
-    args = parser.parse_args()
-    s = Server(template=args.template, context=args.context)
-    s.run_dev_server()
+    splitname = args.template.split(".")
+    basename = ".".join(splitname[:-1])
+    extension = splitname[-1]
+    if not os.path.isfile(basename + ".pkl"):
+        print(f"{basename}.pkl not found.  Creating an empty context file...")
+        with open(f"{basename}.pkl", "wb") as fn:
+            fn.write(pickle.dumps({}))
+    else:
+        with open(f"{basename}.pkl", "rb") as fn:
+            pickle_data = pickle.loads(fn.read())
+        if len(pickle_data) == 0:
+            print(
+                f"[WARNING] {basename}.pkl contains no data.  Use pantex.Manager.save_context to create context."
+            )
+    s = Server(template=args.template)
+    s.run_server()
