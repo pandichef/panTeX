@@ -1,11 +1,12 @@
 ---
 title: ${customer_name}
-author: ACME Consulting L.P.
+author: ACME Consulting L.L.C.
 date: ${date_string}
 geometry: "left=3cm,right=3cm,top=2cm,bottom=2cm"
 output: pdf_document
 ---
-# Hello, this is a markdown file
+# Hello, this is a file10
+
 
 ${the_raw_data}
 
@@ -14,7 +15,7 @@ ${image_file_name}
 
 ${matplotlib1}
 
-Equations:
+The equations:
 
 \begin{equation}
 B_{i+1} = B_{i} - SchedPrinc_{i} - UnschedPrinc_{i}

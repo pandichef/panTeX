@@ -20,8 +20,13 @@ html_template = Template(
         </head>
     <body>
     ${html_body}
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+    <script id="__bs_script__">//<![CDATA[
+        document.write("<script async src='http://HOST:3000/browser-sync/browser-sync-client.js?v=2.26.14'><\/script>".replace("HOST", location.hostname));
+    //]]></script>
     </body>
     </html>
     """
@@ -34,6 +39,7 @@ def render_markdown(template_name, report_name, context=None):
     report_type = report_name.split(".")[-1]
     image_file_type = image_types[report_type]
 
+    print("asdf")
     try:
         subprocess.run(f"mkdir {assets_directory}", shell=True, check=True)
     except subprocess.CalledProcessError:
@@ -82,13 +88,12 @@ def render_markdown(template_name, report_name, context=None):
             check=True,
         )
     elif report_type in ["html", "htm"]:
+        # https://stackoverflow.com/questions/37533412/md-with-latex-to-html-with-mathjax-with-pandoc
         subprocess.run(
-            f"pandoc {assets_directory}/output.md -o {report_name}",
+            f"pandoc --toc --standalone --mathjax {assets_directory}/output.md -o {report_name}",
             shell=True,
             check=True,
         )
-        # if report_type in ["html", "htm"]:
-        #     rendered = html_template.substitute({"html_body": rendered})
         with open(f"{report_name}", "r") as fn:
             body_text = fn.read()
         if report_type in ["html", "htm"]:
@@ -145,14 +150,51 @@ ax.set_title(r"Histogram of IQ: $\mu=100$, $\sigma=15$")
 
 fig.tight_layout()
 
-render_markdown(
-    "markdown_template.md",
-    "output.pdf",
-    {
-        "customer_name": "J.P. Morgan Chase",
-        "date_string": "March 2021",
-        "the_raw_data": df.head(3),
-        "image_file_name": sns_plot,
-        "matplotlib1": fig,
-    },
-)
+from devserver import check_for_updates
+
+
+def run_dev_server():
+    previous_hash = None
+    browser_sync_process = subprocess.Popen(
+        'browser-sync start --server --files "*.html" --index "output.html',
+        shell=True,
+        # check=True,
+    )
+    print("BrowserSync PID: ", browser_sync_process.pid)
+    while True:
+        # subprocess.Popen
+        new_hash = check_for_updates(
+            filename="./markdown_template.md", previous_hash=previous_hash
+        )
+
+        render_markdown(
+            "markdown_template.md",
+            "output.html",
+            {
+                "customer_name": "J.P. Morgan Chase",
+                "date_string": "March 2021",
+                "the_raw_data": df.head(3),
+                "image_file_name": sns_plot,
+                "matplotlib1": fig,
+            },
+        )
+        # print("dfh")
+
+        previous_hash = new_hash
+
+
+def convert_to_pdf():
+    render_markdown(
+        "markdown_template.md",
+        "output.pdf",
+        {
+            "customer_name": "J.P. Morgan Chase",
+            "date_string": "March 2021",
+            "the_raw_data": df.head(3),
+            "image_file_name": sns_plot,
+            "matplotlib1": fig,
+        },
+    )
+
+
+run_dev_server()

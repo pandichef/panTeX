@@ -31,3 +31,7 @@ Generating pretty reports using pandas and pandoc
 # Requirements  
 * See `requirements.txt` for the Python package requirements  
 * Also requires `pandoc` and `MiKTeX` to be installed (on Windows)  
+
+# Workflow
+* Develop the document using a web page using `browser-sync start --server --files "*.html" --index "output.html"`  
+* Print to `pdf` when you're ready  
