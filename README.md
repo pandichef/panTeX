@@ -89,5 +89,5 @@ Behind the scenes, panTeX saves the image at `assets/pretty_figure.eps` and adds
 to the *rendered* version of markdown file.
 
 # The Development Server (Edit Mode)
-`python -m pantex.edit mytemplate.md` enables an in-browser version of the LaTeX report.  It's not quite as pretty as the pdf version, but it offers a near real time rendering experience.  (Rendering of pdf reports is typically too slow for editing.) If you need 
-the html files, they can be found at `mytemplate.html` and `assets/`.
+`python -m pantex.edit mytemplate.md` enables an in-browser version of the LaTeX report.  It's not quite as pretty as the pdf version, but it offers a near real time rendering experience.  (Rendering of pdf reports is typically too slow for editing and requires 
+the file to re-opened after each render.) If you need the html files, they can be found at `mytemplate.html` and `assets/`.

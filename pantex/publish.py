@@ -158,10 +158,14 @@ class Manager:
         """
         css = [latex_css, syntaxhighlighting_css]
         # pandoc --css seems to place the css at the bottom of <head>
-        scripts = [syntaxhighlighting_script, browsersync_script]  # pandoc does mathjax
+        scripts = [
+            mathjax_script,  # pandoc's mathjax link doesn't work in WSL2!
+            syntaxhighlighting_script,
+            browsersync_script,
+        ]  # pandoc does mathjax
         rendered = self._render_to_html_body()
         rendered = rendered.replace("<head>", "<head>\n" + "\n".join(css))
-        # rendered = rendered.replace("</head>", "\n".join(css) + "\n</head>") # option 2
+        # rendered = rendered.replace("</head>", "\n".join(css) + "\n</head>")  # option 2
         rendered = rendered.replace("</body>", "\n".join(scripts) + "\n</body>")
         with open(f"{self._html_ouput_file_name}", "w") as fn:
             fn.write(rendered)
