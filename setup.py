@@ -130,10 +130,10 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        "pandas==1.2.4",
-        "seaborn==0.11.1",
-        "tabulate==0.8.9",
-        "typing-extensions==3.10.0.0",
+        "pandas>=1.0.0",  # DataFrame.to_markdown added in version 1.0.0
+        "seaborn",
+        "tabulate",
+        "typing-extensions",
     ],  # Optional
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
