@@ -55,18 +55,25 @@ class Manager:
         else:
             return self._context
 
-    def save_context(self, context_dict):
+    def save_context(self, context_dict, append=False):
         # if string, then it's serialized as pkl
         if isinstance(self._context, str):
             if self._context_file_type == "pkl":
-                with open(self._context, "wb") as fn:
-                    fn.write(pickle.dumps(context_dict))
+                if append:
+                    with open(self._context, "rb") as fn:
+                        _context_to_update = pickle.loads(fn.read())
+                    _context_to_update.update(context_dict)
+                    with open(self._context, "wb") as fn:
+                        fn.write(pickle.dumps(_context_to_update))
+                else:
+                    with open(self._context, "wb") as fn:
+                        fn.write(pickle.dumps(context_dict))
                 return self._context  # return file name
             else:
                 raise Exception("Only .pkl context files are supported")
         else:
             raise Exception(
-                "Cannot save.  This Manager instance isn't using a pickled context file."
+                "Cannot save.  This Manager instance isn't using a pickle context file."
             )
 
     def _render_pandas_dataframe(self, df: pd.DataFrame, caption: str) -> str:
