@@ -61,4 +61,5 @@ Note that pandas DataFrame objects will be automatically rendered as a table.  M
 charts and LaTeX style equations are also supported.  (The LaTeX equations must be contained in `\begin{equation}`/`\end{equation}` tags.)
 
 # The Development Server (Edit Mode)
-`python -m pantex.edit mytemplate.md` enables an in-browser version of the LaTeX report.  It's not quite as pretty as the pdf version, but it offers a near real time rendering experience.  (Rendering of pdf reports is typically too slow for editing.)
+`python -m pantex.edit mytemplate.md` enables an in-browser version of the LaTeX report.  It's not quite as pretty as the pdf version, but it offers a near real time rendering experience.  (Rendering of pdf reports is typically too slow for editing.) If you need 
+the html files, they can be found at `mytemplate.html` and `assets/`.
