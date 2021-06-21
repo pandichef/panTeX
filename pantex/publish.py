@@ -11,7 +11,12 @@ import seaborn as sns
 import matplotlib
 
 # the best image type for each file type
-image_types = {"html": "png", "htm": "png", "pdf": "eps"}
+if os.name == "posix":
+    image_types = {"html": "png", "htm": "png", "pdf": "pdf"}
+elif os.name == "nt":
+    image_types = {"html": "png", "htm": "png", "pdf": "eps"}
+else:
+    raise SystemError(f"Only posix and windows operating systems are supported")
 
 
 class Manager:
@@ -96,7 +101,7 @@ class Manager:
         md_string = f"![{caption.replace('_', ' ').title()}]({temp_file})"
         return md_string
 
-    def _render_all_to_markdown(self, image_type: Literal["eps", "png"]):
+    def _render_all_to_markdown(self, image_type: Literal["eps", "png", "pdf"]):
         stringified_context = {}
         for label, value in self.get_context().items():
             if type(value) in [sns.axisgrid.FacetGrid, matplotlib.figure.Figure]:
