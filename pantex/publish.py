@@ -1,14 +1,14 @@
 import os
+import uuid
 from typing import Union
 from typing_extensions import Literal
 from string import Template
 import pickle
 import subprocess
-from matplotlib.colors import BoundaryNorm
 import pandas as pd
-from pandas.core import base
 import seaborn as sns
 import matplotlib
+import altair
 
 # the best image type for each file type
 if os.name == "posix":
@@ -89,34 +89,67 @@ class Manager:
 
     def _render_matplotlib_figure(  # and seaborn
         self,
-        figure: Union[sns.axisgrid.FacetGrid, matplotlib.figure.Figure],
+        figure: Union[
+            sns.axisgrid.FacetGrid,
+            matplotlib.figure.Figure,
+            altair.vegalite.v4.api.Chart,
+        ],
         caption: str,
         image_file_type: str,
     ) -> str:
         # returns a string, but ALSO saves the image to assets directory
-        temp_file = (
+        image_file_path = (
             f"{self._assets_directory}/{caption.replace(' ','_')}.{image_file_type}"
         )
-        figure.savefig(temp_file)
-        md_string = f"![{caption.replace('_', ' ').title()}]({temp_file})"
+        if hasattr(figure, "savefig"):  # matplotlib/seaborn
+            figure.savefig(image_file_path)
+        elif hasattr(figure, "save"):  # altair
+            # https://altair-viz.github.io/user_guide/saving_charts.html
+            # hack (for Altair)
+            # svg/pdf formats didn't work for me
+            image_file_path = f"{self._assets_directory}/{caption.replace(' ','_')}.svg"
+            figure.save(image_file_path)
+        # elif hasattr(figure, "write_image"):  # plotly
+        #     # I never got this to work on Windows 10
+        #     figure.write_image(image_file_path)
+        # elif hasattr(figure, "output_backend"):  # bokeh
+        #     # Note: bokeh figures can't be serialized, so this can only be used with an in-memory context
+        #     # https://docs.bokeh.org/en/latest/docs/user_guide/export.html
+        #     # https://stackoverflow.com/questions/24060173/with-bokeh-how-to-save-to-a-png-or-jpg-instead-of-a-html-file
+        #     from bokeh.io import export_svg
+
+        #     figure.output_backend = "svg"
+        #     export_svgs(figure, filename=image_file_path)
+        md_string = f"![{caption.replace('_', ' ').title()}]({image_file_path})"
         return md_string
 
     def _render_all_to_markdown(self, image_type: Literal["eps", "png", "pdf"]):
         stringified_context = {}
         for label, value in self.get_context().items():
-            if type(value) in [sns.axisgrid.FacetGrid, matplotlib.figure.Figure]:
+            # seaborn has many figure "types"
+            if (
+                type(value).__module__.startswith("seaborn")
+                or type(value).__module__.startswith("matplotlib")
+                or type(value).__module__.startswith("altair")
+                or type(value).__module__.startswith("plotly")
+                or type(value).__module__.startswith("bokeh")
+            ):
                 md_string = self._render_matplotlib_figure(value, label, image_type)
                 stringified_context.update({label: md_string})
             elif type(value) == pd.DataFrame:
                 md_string = self._render_pandas_dataframe(value, label)
                 stringified_context.update({label: md_string})
             else:
-                stringified_context.update({label: value})
+                stringified_context.update({label: str(value)})
         with open(self._template, "r") as fn:
             template_string = fn.read()
-        template_object = Template(template_string)
+        # https://stackoverflow.com/questions/36918818/python-string-template-removes-double
+        random_string = str(uuid.uuid4())
+        template_object = Template(template_string.replace("$$", random_string))
         # safe_substitute allows you to include dollar signs
-        rendered = template_object.safe_substitute(stringified_context)
+        rendered = template_object.safe_substitute(stringified_context).replace(
+            random_string, "$$"
+        )
         return rendered
 
     def _save_rendered_markdown_file(self, report_type: Literal["pdf", "html"]):

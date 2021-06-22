@@ -1,12 +1,12 @@
 # panTeX
-Generating pretty reports using [pandas](https://pandas.pydata.org/) and [matplotlib](https://matplotlib.org/) 
-or [Seaborn](https://seaborn.pydata.org/).  
+Generating pretty reports using [pandas](https://pandas.pydata.org/) and [matplotlib](https://matplotlib.org/), [Seaborn](https://seaborn.pydata.org/) or [Altair](https://altair-viz.github.io/).  
 
 # Installation
 * `pip install pantex` to install the main application  
 * Install [MiKTeX](https://miktex.org/howto/install-miktex) (on Windows) or TBD on Linux  
 * Install [pandoc](https://pandoc.org/installing.html)  
 * Install [Browsersync](https://browsersync.io/) (for browser mode): `npm install -g browser-sync`  
+* Install chromdriver.exe for [Altair](https://altair-viz.github.io/) and make sure it's on your system path  
 
 # Quickstart
 To create a `pantex.Manager` object:  
@@ -38,7 +38,6 @@ To generate a pdf report using a *in-memory* context dictionary:
 m = pantex.Manager('mytemplate.md', {'my_header': 'Hello World!', 'my_table': df.head()})
 m.save_to_pdf()
 ```
-
 
 # Quickstart via Command Line
 To run in browser mode: `python -m pantex.edit mytemplate.md`  
