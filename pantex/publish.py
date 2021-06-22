@@ -107,7 +107,7 @@ class Manager:
             # https://altair-viz.github.io/user_guide/saving_charts.html
             # hack (for Altair)
             # svg/pdf formats didn't work for me
-            image_file_path = f"{self._assets_directory}/{caption.replace(' ','_')}.svg"
+            image_file_path = f"{self._assets_directory}/{caption.replace(' ','_')}.png"
             figure.save(image_file_path)
         # elif hasattr(figure, "write_image"):  # plotly
         #     # I never got this to work on Windows 10
